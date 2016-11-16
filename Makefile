@@ -1,6 +1,6 @@
-obj-m:=led_blink.o
+obj-m:=myled.o
 
-led_blink.ko: led_blink.c
+myled.ko: myled.c
 	make -C /usr/src/linux M=`pwd` V=1 modules
 
 clean:
