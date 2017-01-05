@@ -33,13 +33,13 @@ static volatile uint32_t *gpio_base = NULL;
 #define LED_PIN 25
 
 static int rpi_gpio_function_set(int pin, uint32_t func) {
-	int index = RPI_GPFSEL0_INDEX + pin / 10;
+    int index = RPI_GPFSEL0_INDEX + pin / 10;
     uint32_t shift = (pin % 10) * 3;
-	uint32_t mask = ~(0x07 << shift);
+    uint32_t mask = ~(0x07 << shift);
 
-	gpio_base[index] = (gpio_base[index] & mask) | ((func & 0x07) << shift);
-	
-	return 1;
+    gpio_base[index] = (gpio_base[index] & mask) | ((func & 0x07) << shift);
+
+    return 1;
 }
 
 static ssize_t led_write(struct file* flip, const char* buf, size_t count, loff_t* pos){
