@@ -2,6 +2,9 @@
 
 Simple Device Driver for Raspberry Pi 3 (Raspbian)
 
+## Description
+When you `insmod` this driver, `myled0` and `myswitch0` will appear in `/dev`.
+
 `/dev/myled0` drives led connected to GPIO25  
 `/dev/myswitch0` gets status connected to GPIO20
 
