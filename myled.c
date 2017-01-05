@@ -13,7 +13,34 @@ MODULE_VERSION("0.1");
 static dev_t dev;
 static struct cdev cdv;
 static struct class *cls = NULL;
-static volatile u32 *gpio_base = NULL;
+static volatile uint32_t *gpio_base = NULL;
+
+#define RPI_GPF_INPUT   0x00
+#define RPI_GPF_OUTPUT  0x01
+
+#define RPI_GPFSEL0_INDEX 0
+#define RPI_GPFSEL1_INDEX 1
+#define RPI_GPFSEL2_INDEX 2
+#define RPI_GPFSEL3_INDEX 3
+
+#define RPI_GPSET0_INDEX 7
+#define RPI_GPCLR0_INDEX 10
+
+#define GPIO_PULLNONE 0x0
+#define GPIO_PULLDOWN 0x1
+#define GPIO_PULLUP 0x2
+
+#define LED_PIN 25
+
+static int rpi_gpio_function_set(int pin, uint32_t func) {
+	int index = RPI_GPFSEL0_INDEX + pin / 10;
+    uint32_t shift = (pin % 10) * 3;
+	uint32_t mask = ~(0x07 << shift);
+
+	gpio_base[index] = (gpio_base[index] & mask) | ((func & 0x07) << shift);
+	
+	return 1;
+}
 
 static ssize_t led_write(struct file* flip, const char* buf, size_t count, loff_t* pos){
     char c;
@@ -21,9 +48,9 @@ static ssize_t led_write(struct file* flip, const char* buf, size_t count, loff_
         return -EFAULT;
     printk(KERN_INFO "receive %c\n", c);
     if(c == '0')
-        gpio_base[10] = 1 << 25;
+        gpio_base[10] = 1 << LED_PIN;
     else if(c == '1')
-        gpio_base[7] = 1 << 25;
+        gpio_base[7] = 1 << LED_PIN;
     return 1;
 }
 
@@ -50,11 +77,7 @@ static int __init init_mod(void){
 
     gpio_base = ioremap_nocache(0x3f200000, 0xA0);
 
-    const u32 led = 25;
-    const u32 index = led/10; //GPFSEL2
-    const u32 shift = (led%10)*3; //15bit; check datasheet pdf pp.91
-    const u32 mask = ~(0x07 << shift);
-    gpio_base[index] = (gpio_base[index] & mask) | (0x01 << shift);
+    rpi_gpio_function_set( LED_PIN, RPI_GPF_OUTPUT );
 
     retval = alloc_chrdev_region(&dev, 0, 1, "led_blink");
     if(retval < 0){
