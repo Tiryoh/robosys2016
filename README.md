@@ -2,6 +2,9 @@
 
 Simple Device Driver for Raspberry Pi 3 (Raspbian)
 
+`/dev/myled0` drives led connected to GPIO25  
+`/dev/myswitch0` gets status connected to GPIO20
+
 ## Requirements
 
 * linux kernel source
@@ -17,7 +20,7 @@ Simple Device Driver for Raspberry Pi 3 (Raspbian)
 
 ### Hardware
 
-Connect led, resistors, switch with Raspberry Pi as shown in schematic.
+Connect led, resistors, switch to Raspberry Pi as shown in schematic.
 
 ![](./docs/images/sch.png)
 
