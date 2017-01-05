@@ -6,7 +6,7 @@ myled.ko: myled.c
 clean:
 	make -C /usr/src/linux M=`pwd` V=1 clean
 
-install:
+install: myled.ko
 	sudo insmod ./myled.ko
 	sudo chmod 666 /dev/myled0
 
