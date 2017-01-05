@@ -13,6 +13,8 @@ When you `insmod` this driver, `myled0` and `myswitch0` will appear in `/dev`.
 * linux kernel source
   * download kernel source into `/usr/src/linux`
   * kernel build scripts : [https://github.com/ryuichiueda/raspberry_pi_kernel_build_scripts](https://github.com/ryuichiueda/raspberry_pi_kernel_build_scripts)
+* Raspberry Pi 2 or Raspberry Pi 3
+  * tested only on Raspberry Pi 3
 * led
 * resistor
   * 330[ohm]
