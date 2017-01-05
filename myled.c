@@ -12,10 +12,7 @@ MODULE_DESCRIPTION("A simple driver for controlling RasPi GPIO");
 MODULE_LICENSE("GPL");
 MODULE_VERSION("0.1");
 
-/* static dev_t dev; */
-/* static struct cdev cdv; */
 static struct cdev *cdev_array = NULL;
-/* static struct class *cls = NULL; */
 static struct class *class_led = NULL;
 static struct class *class_switch = NULL;
 static volatile uint32_t *gpio_base = NULL;
@@ -23,17 +20,14 @@ static volatile uint32_t *gpio_base = NULL;
 static volatile int cdev_index = 0;
 static volatile int open_counter = 0;
 
-#define RPI_GPIO_P2MASK (uint32_t)0xffffffff
+#define MAX_BUFLEN 64
+unsigned char sw_buf[MAX_BUFLEN];
+static int buflen = 0;
 
 #define DEV_MAJOR 0
 #define DEV_MINOR 0
 
-#define DEVNAME_LED "myled"
-#define DEVNAME_SWITCH "myswitch"
-
-#define MAX_BUFLEN 64
-unsigned char sw_buf[MAX_BUFLEN];
-static int buflen = 0;
+#define RPI_GPIO_P2MASK (uint32_t)0xffffffff
 
 #define RPI_REG_BASE 0x3f000000
 
@@ -64,6 +58,9 @@ static int buflen = 0;
 #define LED_PIN 25
 #define SW_PIN 20
 
+#define DEVNAME_LED "myled"
+#define DEVNAME_SWITCH "myswitch"
+
 static int _major_led = DEV_MAJOR;
 static int _minor_led = DEV_MINOR;
 
@@ -86,29 +83,9 @@ static void rpi_gpio_clear32(uint32_t mask, uint32_t val) {
   gpio_base[RPI_GPCLR0_INDEX] = val & mask;
 }
 
-static int led_put(int ledno) {
-  switch (ledno) {
-  case 0:
-    rpi_gpio_set32(RPI_GPIO_P2MASK, 1 << LED_PIN);
-    break;
-  }
-  return 0;
-}
-
-static int led_del(int ledno) {
-  switch (ledno) {
-  case 0:
-    rpi_gpio_clear32(RPI_GPIO_P2MASK, 1 << LED_PIN);
-    break;
-  }
-  return 0;
-}
-
-static ssize_t led_write(struct file *filep, const char __user *buf,
-                         size_t count, loff_t *f_pos) {
+static ssize_t led_write(struct file *flip, const char *buf, size_t count,
+                         loff_t *pos) {
   char cval;
-  int ret;
-  int minor = *((int *)filep->private_data);
 
   if (count > 0) {
     if (copy_from_user(&cval, buf, sizeof(char))) {
@@ -116,10 +93,10 @@ static ssize_t led_write(struct file *filep, const char __user *buf,
     }
     switch (cval) {
     case '1':
-      ret = led_put(minor);
+      rpi_gpio_set32(RPI_GPIO_P2MASK, 1 << LED_PIN);
       break;
     case '0':
-      ret = led_del(minor);
+      rpi_gpio_clear32(RPI_GPIO_P2MASK, 1 << LED_PIN);
       break;
     }
     return sizeof(char);
