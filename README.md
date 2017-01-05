@@ -12,6 +12,8 @@ Simple Device Driver for Raspberry Pi 3 (Raspbian)
 
 ### Hardware
 
+![](./docs/images/sch.png)
+
 ### Software
 
 First, download this repository.
